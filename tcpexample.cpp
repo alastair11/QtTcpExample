@@ -82,11 +82,13 @@ void TCPExample::error(const QString &string) {
 }
 
 void TCPExample::sendMessage() {
-    client->sendNewMessage(ui->tcpText->text());
-    ui->tcpText->setText("");
+    if (!ui->tcpText->text().isEmpty()) {
+        client->sendNewMessage(ui->tcpText->text());
+        ui->tcpText->setText("");
+    }
 }
 
 void TCPExample::incomingMessage(const QString &string) {
-    ui->lstMessages->addItem(string);
+    ui->lstMessages->insertItem(0,string);
 }
 

@@ -59,4 +59,5 @@ void Server::incomingMessage() {
 Server::~Server() {
     tcpServer->disconnect();
     tcpServer->close();
+    delete tcpServer;
 }
