@@ -55,3 +55,8 @@ void Server::incomingMessage() {
 
     emit newMessage(message);
 }
+
+Server::~Server() {
+    tcpServer->disconnect();
+    tcpServer->close();
+}

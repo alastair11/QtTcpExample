@@ -11,14 +11,16 @@ class Client : public QObject {
 Q_OBJECT
 public:
     Client(const QString& host, const QString& port);
-    ~Client() override { delete tcpSocket;};
+    ~Client();
+    void disconnect();
 signals:
     void displayError(const QString& string);
+    void connected();
+    void disconnected();
 
 public slots:
     void sendNewMessage(const QString& str);
     void tcpError(QAbstractSocket::SocketError socketError);
-
 private:
     QTcpSocket* tcpSocket = nullptr;
 };

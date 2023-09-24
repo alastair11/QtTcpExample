@@ -7,7 +7,7 @@ class Server : public QObject {
 Q_OBJECT
 public:
     Server();
-    ~Server() override {delete tcpServer;};
+    ~Server();
 signals:
     void newConnection(const QHostAddress&);
     void error(const QString&);

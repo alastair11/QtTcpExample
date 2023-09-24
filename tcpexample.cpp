@@ -11,6 +11,7 @@ TCPExample::TCPExample(QWidget *parent)
     QAbstractButton::connect( ui->disconnect, SIGNAL( clicked() ), this, SLOT( disconnected() ) );
     QAbstractButton::connect( ui->listen, SIGNAL( clicked() ), this, SLOT( listen() ) );
     QAbstractButton::connect( ui->send, SIGNAL( clicked() ), this, SLOT( sendMessage() ) );
+    QAbstractButton::connect( ui->tcpText, SIGNAL( returnPressed()), this, SLOT( sendMessage() ) );
 }
 
 TCPExample::~TCPExample()
@@ -24,12 +25,14 @@ void TCPExample::connect() {
 
     Connect* connectDialog = new Connect();
     QObject::connect( connectDialog, &Connect::newConnection, this, &TCPExample::connected);
+    QObject::connect( connectDialog, &Connect::rejected, this, &TCPExample::disconnected);
     connectDialog->show();
 }
 
 void TCPExample::connected(Client* newClient) {
     client = std::unique_ptr<Client>(newClient);
     QObject::connect( newClient, &Client::displayError, this, &TCPExample::error);
+    ui->lblInfo->setText("Connected!...");
     ui->connect->setText("Connect");
     ui->connect->setHidden(true);
     ui->connect->setDisabled(false);
@@ -38,14 +41,23 @@ void TCPExample::connected(Client* newClient) {
 }
 
 void TCPExample::disconnected() {
-    client = nullptr;
+    client->disconnect();
+    ui->lblInfo->setText("Disconnected...");
+    ui->connect->setText("Connect");
+    ui->connect->setDisabled(false);
     ui->connect->setHidden(false);
     ui->listen->setDisabled(false);
     ui->tcpText->setDisabled(true);
+    ui->send->setDisabled(true);
 }
 
 void TCPExample::listen() {
+    if (server != nullptr) {
+        stopListening();
+        return;
+    }
     ui->listen->setText("Stop Listening");
+    ui->lblInfo->setText("Listening!...");
     ui->tcpText->setDisabled(true);
     server = std::make_unique<Server>();
     QObject::connect( server.get(), SIGNAL( newConnection() ), this, SLOT( listening() ) );
@@ -53,7 +65,9 @@ void TCPExample::listen() {
 }
 
 void TCPExample::stopListening() {
+    server = nullptr;
     ui->listen->setText("Listen");
+    ui->lblInfo->setText("Stopped listening...");
     ui->connect->setDisabled(false);
 }
 
@@ -64,10 +78,12 @@ void TCPExample::listening(const QHostAddress& ipAddress) {
 
 void TCPExample::error(const QString &string) {
     ui->lblInfo->setText(string);
+    disconnected();
 }
 
 void TCPExample::sendMessage() {
-    client->sendNewMessage(ui->tcpText->document()->toPlainText());
+    client->sendNewMessage(ui->tcpText->text());
+    ui->tcpText->setText("");
 }
 
 void TCPExample::incomingMessage(const QString &string) {

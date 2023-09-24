@@ -24,8 +24,10 @@ signals:
 
 public slots:
     void tcpConnect();
-
+    void attemptConnection();
+    void showError(const QString &);
 private:
+    Client* client;
     Ui::Connect *ui;
 };
 
